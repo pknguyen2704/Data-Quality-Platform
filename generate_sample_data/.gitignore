@@ -1,2 +1,4 @@
 venv
 dirty_mysql_csv
+schema1/telecom_cdr_csv/*.csv
+schema2/telecom_usage_csv/*.csv
