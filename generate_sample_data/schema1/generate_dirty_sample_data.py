@@ -19,7 +19,8 @@ def make_dirty(df_pd, dirty_frac=0.3, seed=42):
     if n_dirty == 0:
         return df
 
-    available_features = list(df.columns)
+    # Loại bỏ record_id khỏi danh sách cột được làm bẩn
+    available_features = [c for c in df.columns if c != "record_id"]
     k = min(6, len(available_features))  # chọn ngẫu nhiên một số cột để làm bẩn
     features_to_dirty = rng.choice(available_features, size=k, replace=False)
 
@@ -32,7 +33,7 @@ def make_dirty(df_pd, dirty_frac=0.3, seed=42):
                 df.at[row_idx, col] = None
             else:
                 if pd.api.types.is_object_dtype(df[col]):
-                    val = str(df.at[row_idx, col])
+                    val = str(df.at[row_idx, col]) if df.at[row_idx, col] is not None else ""
                     dirty_suffix = "_" + "".join(rng.choice(list("ABCXYZ0123456789"), size=4))
                     df.at[row_idx, col] = val + dirty_suffix
                 elif pd.api.types.is_numeric_dtype(df[col]):
@@ -42,6 +43,7 @@ def make_dirty(df_pd, dirty_frac=0.3, seed=42):
                         df.at[row_idx, col] = round(val + noise, 2)
 
     return df
+
 
 
 # ---------------- Hàm sinh dữ liệu ----------------
@@ -83,7 +85,7 @@ def generate_telecom_data(start_time, end_time, n_records, apply_dirty=False):
     df = pd.DataFrame(data)
 
     if apply_dirty:
-        df = make_dirty(df, dirty_frac=0.3, seed=random.randint(1, 1000))
+        df = make_dirty(df, dirty_frac=0.5, seed=random.randint(1, 1000))
 
     return df
 

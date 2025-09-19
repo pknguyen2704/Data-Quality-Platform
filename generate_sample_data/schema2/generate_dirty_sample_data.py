@@ -88,15 +88,15 @@ def generate_telecom_usage(start_time, end_time, n_records, apply_dirty=False):
     df = pd.DataFrame(data)
 
     if apply_dirty:
-        df = make_dirty(df, dirty_frac=0.3, seed=random.randint(1, 1000), exclude_cols=["date_hour"])
+        df = make_dirty(df, dirty_frac=0.5, seed=random.randint(1, 1000), exclude_cols=["date_hour", "session_id"])
 
     return df
 
 
 # ---------------- Main ----------------
 if __name__ == "__main__":
-    start_time = datetime(2025, 9, 21, 10, 0, 0)
-    end_time = datetime(2025, 9, 21, 10, 30, 0)
+    start_time = datetime(2025, 9, 21, 10, 30, 0)
+    end_time = datetime(2025, 9, 21, 11, 0, 0)
     n_records = 1000
 
     # True = dữ liệu bẩn, False = dữ liệu sạch

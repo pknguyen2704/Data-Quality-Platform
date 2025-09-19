@@ -53,8 +53,8 @@ def generate_telecom_usage(start_time, end_time, n_records):
 
 # ---------------- Main ----------------
 if __name__ == "__main__":
-    start_time = datetime(2025, 9, 20, 10, 0, 0)
-    end_time = datetime(2025, 9, 21, 10, 30, 0)
+    start_time = datetime(2025, 9, 20, 10, 30, 0)
+    end_time = datetime(2025, 9, 20, 11, 0, 0)
     n_records = 1000
 
     df = generate_telecom_usage(start_time, end_time, n_records)
