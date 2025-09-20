@@ -36,46 +36,6 @@ UNUSE_FEATURES_DEFAULT = [
     "answer_ts_epoch","end_ts_epoch"
 ]
 
-def run_deequ_analyzer(spark, df, file_path, table_name, ts_value):
-    print("___START_DEEQU_ANALYZER___")
-    size_analyzer = Size()
-    analyzers = []
-    for field in df.schema.fields:
-        col_name = field.name
-        data_type = field.dataType
-
-        # base analyzers
-        analyzers.extend([Completeness(col_name), ApproxCountDistinct(col_name)])
-
-        # type specific
-        from pyspark.sql.types import NumericType, StringType
-        if isinstance(data_type, NumericType):
-            analyzers.extend([Minimum(col_name), Maximum(col_name), Mean(col_name), Sum(col_name)])
-        elif isinstance(data_type, StringType):
-            analyzers.extend([MaxLength(col_name), MinLength(col_name)])
-
-    # run analysis (pydeequ chỉ có addAnalyzer)
-    builder = AnalysisRunner(spark).onData(df).addAnalyzer(size_analyzer)
-    for analyzer in analyzers:
-        builder = builder.addAnalyzer(analyzer)
-
-    analysis_result = builder.run()
-
-    metrics_df = AnalyzerContext.successMetricsAsDataFrame(spark, analysis_result)
-
-    metrics_df = (metrics_df
-                  .withColumn("timestamp", F.lit(ts_value).cast(TimestampType()))
-                  .withColumn("path", F.lit(file_path))
-                  .withColumn("table", F.lit(table_name))
-                  .withColumn("type", F.when(F.col("entity") == "Dataset", F.lit("Dataset"))
-                                        .when(F.col("entity") == "Column", F.lit("Column"))
-                                        .otherwise(F.lit("unknown")))
-                  .withColumnRenamed("instance", "column")
-                  .withColumnRenamed("name", "metric")
-                  .select("timestamp", "path", "table", "type", "column", "metric", "value"))
-    return metrics_df
-
-
 def push_metrics_to_pushgateway(spark_metrics_df, pushgateway_url, job_name=JOB_NAME):
     print(f"___PUSHING_METRICS_TO_PUSHGATEWAY___ {pushgateway_url}, job: {job_name}")
     registry = CollectorRegistry()
